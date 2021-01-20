@@ -1,0 +1,48 @@
+---
+ - hosts: centos
+  
+   tasks: 
+    - name: Ensure cron daemon is enabled
+      shell: systemctl is-enabled crond
+      register: output
+    - debug: var=output.stdout_lines
+      
+    - name: Ensure permissions on /etc/crontab are configured
+      shell: stat /etc/crontab
+      register: permission_output
+      failed_when: "'Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)' != permission_output.stdout_lines[3]"
+      
+    - name: Ensure SSH LogLevel is appropriate
+      shell: sshd -T | grep loglevel
+      register: permission_output
+      failed_when: permission_output.stdout != "loglevel INFO"
+    
+    - name: Ensure SSH X11 forwarding is disabled
+      shell: sshd -T | grep x11forwarding
+      register: permission_output
+      failed_when: permission_output.stdout != "x11forwarding no"   
+      
+    - name: Ensure SSH MaxAuthTries is set to 4 or less
+      shell: sshd -T | grep maxauthtries
+      register: permission_output
+      failed_when: permission_output.stdout[-1] | int >  4  
+                    
+    - name: Ensure permissions on /etc/motd are configured
+      shell: stat /etc/motd
+      register: permission_output
+      failed_when: "'Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)' != permission_output.stdout_lines[3]"
+                   
+    - name: Ensure permissions on /etc/issue are configured
+      shell: stat /etc/issue
+      register: permission_output
+      failed_when: "'Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)' != permission_output.stdout_lines[3]"
+    
+    - name: Ensure permissions on /etc/issue.net are configured
+      shell: stat /etc/issue.net
+      register: permission_output
+      failed_when: "'Access: (0644/-rw-r--r--)  Uid: (    0/    root)   Gid: (    0/    root)' != permission_output.stdout_lines[3]"
+           
+    - name: Ensure permissions on /etc/passwd- are configured
+      shell: stat /etc/passwd-
+      register: permission_output
+      failed_when: permission_output.stdout_lines[3] | regex_search('\\d+') | int < 600
