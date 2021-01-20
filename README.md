@@ -6,6 +6,6 @@ Command for executing playbook:
 
 ansible-playbook -i hosts centos.yml 
 
-Inventory host path = hosts
+hosts = Inventory host path
 
 Playbook will be executed for all hosts under centos group.
